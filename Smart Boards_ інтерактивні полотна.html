@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Boards: інтерактивні полотна</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F2EDE4;
+  --teal-dark:#2D6B5E;
+  --teal:#4A9B8E;
+  --teal-light:#7BBFB5;
+  --teal-pale:#C8E6E2;
+  --warm:#D4906A;
+  --text:#2C3830;
+  --text-mid:#5A6B60;
+  --text-light:#8FA090;
+  --card:#FFFFFF;
+  --shadow:0 4px 20px rgba(45,107,94,.10);
+  --shadow-hover:0 8px 32px rgba(45,107,94,.18);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+body{
+  font-family:'Raleway',sans-serif;
+  min-height:100vh;
+  background:var(--cream);
+  color:var(--text);
+  position:relative;
+  overflow-x:hidden;
+}
+
+/* ── ATOM BACKGROUND ── */
+.atom-bg{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.atom-bg svg{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:min(900px,140vw);
+  height:min(900px,140vw);
+  opacity:.13;
+}
+
+/* ── GRADIENT OVERLAY ── */
+.gradient-overlay{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 50% at 10% 20%, rgba(212,179,140,.45) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 90% 80%, rgba(180,210,200,.40) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 60% at 50% 50%, rgba(242,237,228,.60) 0%, transparent 80%);
+}
+
+/* ── LAYOUT ── */
+.page{
+  position:relative;
+  z-index:1;
+  max-width:860px;
+  margin:0 auto;
+  padding:60px 32px 80px;
+}
+
+/* ── HEADER ── */
+.header{
+  text-align:center;
+  margin-bottom:36px;
+}
+.padlet-logo{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  margin-bottom:28px;
+}
+.padlet-crane{width:58px;height:58px}
+.padlet-wordmark{
+  font-family:'Raleway',sans-serif;
+  font-weight:600;
+  font-size:.78rem;
+  color:var(--teal);
+  letter-spacing:2px;
+  text-transform:lowercase;
+}
+
+.header h1{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;
+  font-size:clamp(2rem,5vw,3rem);
+  color:var(--teal-dark);
+  line-height:1.15;
+  margin-bottom:20px;
+}
+.header h1 em{
+  font-style:italic;
+  color:var(--teal);
+}
+
+.header-desc{
+  max-width:640px;
+  margin:0 auto 28px;
+  font-size:.97rem;
+  line-height:1.80;
+  color:var(--text-mid);
+}
+
+.section-intro{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:1.12rem;
+  color:var(--teal-dark);
+  margin-bottom:36px;
+}
+
+/* ── DIVIDER ── */
+.divider{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:36px;
+}
+.divider::before,.divider::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,transparent,var(--teal-pale),transparent);
+}
+.divider-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--teal-light);
+}
+
+/* ── LINKS LIST ── */
+.links-list{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border:1px solid rgba(74,155,142,.15);
+  border-radius:16px;
+  overflow:hidden;
+  backdrop-filter:blur(2px);
+  background:rgba(255,255,255,.18);
+}
+
+.link-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:transparent;
+  border-radius:12px;
+  box-shadow:none;
+  padding:14px 16px;
+  text-decoration:none;
+  color:inherit;
+  transition:background .18s, padding-left .18s;
+  border:none;
+  border-bottom:1px solid rgba(74,155,142,.15);
+}
+.link-card:last-child{border-bottom:none;}
+.link-card:hover{
+  background:rgba(74,155,142,.07);
+  padding-left:20px;
+}
+
+.link-num{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:600;
+  font-size:1.2rem;
+  color:var(--teal-light);
+  width:32px;
+  text-align:right;
+  flex-shrink:0;
+  line-height:1;
+}
+
+.link-body{flex:1;min-width:0;}
+.link-name{
+  font-family:'Cormorant Garamond',serif;
+  font-weight:700;
+  font-size:1.45rem;
+  color:var(--teal-dark);
+  line-height:1.25;
+  display:block;
+  margin-bottom:4px;
+  transition:color .15s;
+  letter-spacing:-.2px;
+}
+.link-card:hover .link-name{color:var(--teal)}
+.link-tag{
+  font-size:.88rem;
+  font-weight:500;
+  color:var(--text-mid);
+  letter-spacing:.3px;
+}
+
+.link-arrow{
+  font-size:1.1rem;
+  color:var(--teal-light);
+  flex-shrink:0;
+  transition:transform .18s, color .18s;
+}
+.link-card:hover .link-arrow{
+  transform:translateX(5px);
+  color:var(--teal);
+}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;
+  margin-top:56px;
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;
+  font-size:.9rem;
+  color:var(--text-light);
+}
+
+@media(max-width:560px){
+  .page{padding:40px 18px 60px}
+  .link-card{padding:14px 16px;gap:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ATOM BACKGROUND -->
+<div class="atom-bg">
+  <svg viewBox="0 0 900 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- nucleus -->
+    <circle cx="450" cy="450" r="18" fill="#4A9B8E"/>
+    <circle cx="450" cy="450" r="10" fill="#2D6B5E"/>
+    <!-- orbit 1 — horizontal -->
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#4A9B8E" stroke-width="1.2"/>
+    <!-- orbit 2 — tilted 60° -->
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#4A9B8E" stroke-width="1.2" transform="rotate(60 450 450)"/>
+    <!-- orbit 3 — tilted 120° -->
+    <ellipse cx="450" cy="450" rx="340" ry="90" stroke="#4A9B8E" stroke-width="1.2" transform="rotate(120 450 450)"/>
+    <!-- electron dots -->
+    <circle cx="790" cy="450" r="9" fill="#7BBFB5"/>
+    <circle cx="280" cy="266" r="9" fill="#7BBFB5" transform="rotate(60 450 450)"/>
+    <circle cx="620" cy="634" r="9" fill="#7BBFB5" transform="rotate(120 450 450)"/>
+    <!-- outer ring -->
+    <circle cx="450" cy="450" r="400" stroke="#4A9B8E" stroke-width=".5" stroke-dasharray="4 8"/>
+    <circle cx="450" cy="450" r="310" stroke="#4A9B8E" stroke-width=".4" stroke-dasharray="2 10"/>
+    <circle cx="450" cy="450" r="200" stroke="#4A9B8E" stroke-width=".4" stroke-dasharray="2 10"/>
+  </svg>
+</div>
+<div class="gradient-overlay"></div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="padlet-logo">
+      <!-- Official Padlet logo: origami bird mark + wordmark -->
+      <svg class="padlet-crane" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Upper green triangle (top wing / head) -->
+        <polygon points="60,10 90,55 60,48 30,55" fill="#00B09E"/>
+        <!-- Left red/pink triangle -->
+        <polygon points="60,10 30,55 60,48" fill="#FF4757" opacity=".92"/>
+        <!-- Right red/pink triangle -->
+        <polygon points="60,10 90,55 60,48" fill="#FF6B81" opacity=".85"/>
+        <!-- Bottom left wing -->
+        <polygon points="30,55 18,78 60,48" fill="#FF4757" opacity=".70"/>
+        <!-- Bottom right wing -->
+        <polygon points="90,55 102,78 60,48" fill="#FF6B81" opacity=".65"/>
+        <!-- Tail pointing down -->
+        <polygon points="60,48 64,100 60,86 56,100" fill="#00B09E" opacity=".90"/>
+        <!-- Inner highlight -->
+        <polygon points="60,10 68,34 60,32 52,34" fill="#00C9B1" opacity=".60"/>
+      </svg>
+      <span class="padlet-wordmark">padlet</span>
+    </div>
+
+    <h1>Smart Boards:<br><em>інтерактивні полотна</em></h1>
+
+    <p class="header-desc">
+      Padlet — це сучасний віртуальний простір, що трансформує традиційну подачу навчального матеріалу в динамічне, мультимедійне середовище. Інструмент поєднує інтерактивну візуалізацію, фасилітацію командної роботи та можливість персоналізації освітнього треку для кожного учня. Це цифрове полотно дозволяє інтегрувати дослідницькі завдання, інтерактивні симуляції та зворотний зв'язок в єдину структуровану екосистему.
+    </p>
+
+    <p class="section-intro">
+      Нижче представлено мої авторські методичні дошки,<br>розроблені для уроків фізики, математики та виховної роботи:
+    </p>
+
+    <div class="divider"><div class="divider-dot"></div></div>
+  </header>
+
+  <!-- LINKS -->
+  <div class="links-list">
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023lgdjofvsrbbl1cug" target="_blank" rel="noopener">
+      <div class="link-num">1</div>
+      <div class="link-body">
+        <span class="link-name">Функції</span>
+        <span class="link-tag">Математика · 8, 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023o8xxzvswb4zum2xe" target="_blank" rel="noopener">
+      <div class="link-num">2</div>
+      <div class="link-body">
+        <span class="link-name">Властивості чотирикутників</span>
+        <span class="link-tag">Математика · 8, 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023s46t7ezaikz51agv" target="_blank" rel="noopener">
+      <div class="link-num">3</div>
+      <div class="link-body">
+        <span class="link-name">Будова речовини</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s0236vyhh3a5qv5i80mg" target="_blank" rel="noopener">
+      <div class="link-num">4</div>
+      <div class="link-body">
+        <span class="link-name">Прості механізми в реальному житті</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023blh1bf92buo3hmin" target="_blank" rel="noopener">
+      <div class="link-num">5</div>
+      <div class="link-body">
+        <span class="link-name">Приклади оптичних ілюзій</span>
+        <span class="link-tag">Фізика · 7 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023duez5nwtv5ob4xr4?frame_id=page%3ABG2B58wqQDk-It68t_hpv" target="_blank" rel="noopener">
+      <div class="link-num">6</div>
+      <div class="link-body">
+        <span class="link-name">Абетка кінематики</span>
+        <span class="link-tag">Фізика · 10 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s0238483pioc611wfr65" target="_blank" rel="noopener">
+      <div class="link-num">7</div>
+      <div class="link-body">
+        <span class="link-name">Послідовне і паралельне з'єднання в реальному житті</span>
+        <span class="link-tag">Фізика · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s0238p6cw4rz1e5jraqk" target="_blank" rel="noopener">
+      <div class="link-num">8</div>
+      <div class="link-body">
+        <span class="link-name">Історія фізики в обличчях</span>
+        <span class="link-tag">Фізика · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023evm8153kpv8qsm79" target="_blank" rel="noopener">
+      <div class="link-num">9</div>
+      <div class="link-body">
+        <span class="link-name">Застосування електролізу</span>
+        <span class="link-tag">Фізика · 9, 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023ewwg9ut70vtwzgau?frame_id=page%3ABPBDNcOcUTtKJFfA9jvhM" target="_blank" rel="noopener">
+      <div class="link-num">10</div>
+      <div class="link-body">
+        <span class="link-name">Хмара слів «Електричний струм в електролітах»</span>
+        <span class="link-tag">Фізика · 9, 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023vfu8su1h3m4xu7g3" target="_blank" rel="noopener">
+      <div class="link-num">11</div>
+      <div class="link-body">
+        <span class="link-name">Види самостійних газових розрядів</span>
+        <span class="link-tag">Фізика · 9, 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023cqklf4orfh5k08ux?frame_id=page%3Al5IeCyWWoYvS2W_CQJ1X_" target="_blank" rel="noopener">
+      <div class="link-num">12</div>
+      <div class="link-body">
+        <span class="link-name">Чому варто вивчати астрономію?</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-s023s900s5m3a3xuhty3" target="_blank" rel="noopener">
+      <div class="link-num">13</div>
+      <div class="link-body">
+        <span class="link-name">Твій особливий день: небесні координати</span>
+        <span class="link-tag">Астрономія · 11 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/life-9-b6131hlw2x5knqzs" target="_blank" rel="noopener">
+      <div class="link-num">14</div>
+      <div class="link-body">
+        <span class="link-name">Класний Life 9-А</span>
+        <span class="link-tag">Виховна робота · 9 клас</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/edtech-kmcm2gnaws1v8kya" target="_blank" rel="noopener">
+      <div class="link-num">15</div>
+      <div class="link-body">
+        <span class="link-name">Мій EdTech-інструментарій</span>
+        <span class="link-tag">Для вчителів</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+    <a class="link-card" href="https://padlet.com/siyanko123/padlet-16o83cby2bzpadjj" target="_blank" rel="noopener">
+      <div class="link-num">16</div>
+      <div class="link-body">
+        <span class="link-name">Вебінари: Ідеї та інструменти</span>
+        <span class="link-tag">Для вчителів</span>
+      </div>
+      <span class="link-arrow">→</span>
+    </a>
+
+  </div>
+
+  <footer>© Алла Сиянко · Вищетарасівський ліцей · Методичний хаб</footer>
+</div>
+
+</body>
+</html>
